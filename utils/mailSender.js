@@ -14,14 +14,14 @@ const transporter = nodemailer.createTransport({
 user is user email and otp is otpnumber
 we need to pass it as string to avoid errors
 */
-const sendVerificationMail = async (user, otp) => {
+const sendMail = async (to, subject, text, html) => {
   try {
     const info = await transporter.sendMail({
       from: "Binit Kumar @studynotion",
-      to: `${user}`,
-      subject: "OTP VERIFICATION AT STUDYNOTION",
-      text: `${otp}`,
-      html: `${otp}`,
+      to: `${to}`,
+      subject: `${subject}`,
+      text: `${text}`,
+      html: `${html}`,
     });
 
     console.log(`mail sent successfully to: ${user} , info:`, info);
@@ -30,4 +30,4 @@ const sendVerificationMail = async (user, otp) => {
   }
 };
 
-module.exports = sendVerificationMail;
+module.exports = sendMail;

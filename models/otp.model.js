@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const sendVerificationMail = require("../utils/mailSender");
+const sendMail = require("../utils/mailSender");
 
 const otpSchema = new mongoose.Schema({
   OTP: {
@@ -24,9 +24,14 @@ so we can later compare it
 */
 otpSchema.pre("save", async function (next) {
   try {
-    const response = await sendVerificationMail(this.email, this.OTP);
+    const response = await sendMail(
+      this.email,
+      "OTP FOR SIGNUP",
+      this.OTP,
+      this.OTP
+    );
     next();
-    console.log("Email sent successfully to mail", this.email);
+    console.log("Email sent successfully to mail", this.email, response);
   } catch (error) {
     console.error("error while saving doc", error);
   }

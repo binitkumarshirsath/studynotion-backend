@@ -25,9 +25,6 @@ const userSchema = new mongoose.Schema({
     enum: ["student", "admin", "instructor"],
     required: true,
   },
-  active: {
-    type: Boolean,
-  },
   courses: [
     {
       type: mongoose.Schema.Types.ObjectId,
