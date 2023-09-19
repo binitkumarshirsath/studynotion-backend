@@ -74,7 +74,6 @@ const signupController = async (req, res) => {
     return res.json({
       success: true,
       message: "User registered successfully",
-      response,
     });
   } catch (error) {
     console.error("Error while signup", error);
@@ -85,3 +84,5 @@ const signupController = async (req, res) => {
     });
   }
 };
+
+module.exports = signupController;

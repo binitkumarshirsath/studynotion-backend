@@ -3,7 +3,7 @@ const OTP = require("../../models/otp.model");
 const otpGenerator = require("otp-generator");
 /*
 This controller is used only for sending otp while singup is 
-happending, we can make it reusable for sending otp , we might 
+happening, we can make it reusable for sending otp , we might 
 need to remove the existingUser check if we want to use this same
 function for sending otp when tapped forgetpassword
 or when user wants to change their password
@@ -63,3 +63,5 @@ const sendOTPController = async (req, res) => {
     });
   }
 };
+
+module.exports = sendOTPController;
