@@ -17,14 +17,20 @@ const otpSchema = new mongoose.Schema({
   },
 });
 
-otpSchema.pre("save", async function () {
+/*
+This is a pre hook , it runs before saving anything in otp table,
+before saving the otp in db , we are sending the otp to the users mail
+so we can later compare it
+*/
+otpSchema.pre("save", async function (next) {
   try {
     const response = await sendVerificationMail(this.email, this.OTP);
+    next();
     console.log("Email sent successfully to mail", this.email);
   } catch (error) {
     console.error("error while saving doc", error);
   }
 });
 
-const Otp = mongoose.model("Otp", otpSchema);
-module.exports = Otp;
+const OTP = mongoose.model("Otp", otpSchema);
+module.exports = OTP;
