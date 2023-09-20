@@ -44,6 +44,15 @@ const userSchema = new mongoose.Schema({
   image: {
     type: String,
   },
+
+  //added two more fields for ease in resetting password
+  token: {
+    type: String,
+  },
+  tokenExpiry: {
+    type: Date,
+    expires: 5 * 60 * 1000,
+  },
 });
 
 const User = mongoose.model("User", userSchema);
