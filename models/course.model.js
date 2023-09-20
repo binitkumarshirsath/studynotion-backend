@@ -20,12 +20,11 @@ const courseSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  courseContent: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Section",
-    },
-  ],
+  courseContent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Section",
+  },
+
   ratingAndReviews: [
     {
       type: mongoose.Schema.Types.ObjectId,

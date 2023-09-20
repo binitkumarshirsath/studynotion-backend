@@ -4,6 +4,7 @@ const tagSchema = new mongoose.Schema({
   name: {
     type: String,
     trim: true,
+    unique: true,
     required: true,
   },
   description: {
@@ -11,6 +12,12 @@ const tagSchema = new mongoose.Schema({
     trim: true,
     required: true,
   },
+  courses: [
+    {
+      type: mongoose.Schema.Types.mongoose,
+      ref: "Course",
+    },
+  ],
 });
 
 const Tag = mongoose.model("Tag", tagSchema);
