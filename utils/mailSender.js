@@ -10,10 +10,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-/*
-user is user email and otp is otpnumber
-we need to pass it as string to avoid errors
-*/
 const sendMail = async (to, subject, text, html) => {
   try {
     const info = await transporter.sendMail({

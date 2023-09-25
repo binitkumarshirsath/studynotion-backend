@@ -7,6 +7,8 @@ const ratingAndReviewSchema = new mongoose.Schema({
   },
   rating: {
     type: Number,
+    min: 1,
+    max: 5,
   },
   review: {
     type: String,
@@ -19,4 +21,4 @@ const RatingAndReview = mongoose.model(
   ratingAndReviewSchema
 );
 
-module.exports = RatingAndReviews;
+module.exports = RatingAndReview;

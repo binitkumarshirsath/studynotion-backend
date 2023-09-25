@@ -10,7 +10,7 @@ module.exports.connectToCloudinary = () => {
     });
     console.log("Connection successfull to cloudinary.");
   } catch (error) {
-    console.error("Error while connecting to Cloudinary", error);
+    console.error("Error while connecting to cloudinary", error);
     process.exit(1);
   }
 };

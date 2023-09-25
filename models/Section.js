@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const sectionSchema = new mongoose.Schema({
   sectionName: {
     type: String,
+    required: true,
   },
   subSection: [
     {
@@ -12,6 +13,6 @@ const sectionSchema = new mongoose.Schema({
   ],
 });
 
-const SectionSchema = mongoose.model("SectionSchema", sectionSchema);
+const Section = mongoose.model("Section", sectionSchema);
 
-module.exports = SectionSchema;
+module.exports = Section;

@@ -2,27 +2,28 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   firstName: {
-    type: String,
     required: true,
-    trim: true,
+    type: String,
   },
   lastName: {
+    required: true,
     type: String,
-    trim: true,
   },
   email: {
-    type: String,
     required: true,
-    trim: true,
-    unique: true,
+    type: String,
   },
   password: {
     type: String,
     required: true,
   },
+  additionalDetails: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Profile",
+  },
   accountType: {
-    type: String,
     enum: ["student", "admin", "instructor"],
+    type: String,
     required: true,
   },
   courses: [
@@ -31,10 +32,6 @@ const userSchema = new mongoose.Schema({
       ref: "Course",
     },
   ],
-  additionalDetails: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Profile",
-  },
   courseProgess: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -45,13 +42,13 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
 
-  //added two more fields for ease in resetting password
+  //forget password fields
   token: {
     type: String,
   },
-  tokenExpiry: {
+
+  tokenExpiresIn: {
     type: Date,
-    expires: 5 * 60 * 1000,
   },
 });
 
