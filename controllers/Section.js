@@ -54,3 +54,93 @@ module.exports.createSection = async (req, res) => {
     });
   }
 };
+
+module.exports.updateSection = async (req, res) => {
+  try {
+    const sectionName = req.body.sectionName;
+    const sectionId = req.body.sectionId;
+    if (!sectionName) {
+      return res.status(400).json({
+        success: false,
+        message: "Section name is required.",
+      });
+    }
+
+    if (!sectionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Section id is required",
+      });
+    }
+
+    const updatedSection = await Section.findByIdAndUpdate(
+      {
+        _id: sectionId,
+      },
+      {
+        sectionName,
+      },
+      {
+        new: true,
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Section updated successfully",
+      updatedSection,
+    });
+  } catch (error) {
+    console.error("Error while updating section ", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error while updating subsection",
+      error,
+    });
+  }
+};
+
+module.exports.deleteSection = async (req, res) => {
+  try {
+    const sectionId = req.body.sectionId;
+    const courseId = req.body.courseId;
+    if (!sectionId || !courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid section or course Id",
+      });
+    }
+
+    const doesSectionExists = await Section.findById({ _id: sectionId });
+    const doesCourseExists = await Course.findById({ _id: courseId });
+
+    if (!doesSectionExists || !doesCourseExists) {
+      return res.status.json({
+        success: false,
+        message: "Section or Course do not exist with the given id",
+        sectionId: `Section Id ${sectionId} , course id ${courseId}`,
+      });
+    }
+    //remove from course model
+    doesCourseExists.courseContent = doesCourseExists.courseContent.filter(
+      (contentId) => {
+        return contentId.toString() !== sectionId.toString();
+      }
+    );
+    await doesCourseExists.save();
+    const deletedSection = await Section.findByIdAndDelete({ _id: sectionId });
+
+    return res.status(200).json({
+      success: false,
+      message: "Section deleted successfully",
+      deletedSection,
+    });
+  } catch (error) {
+    console.error("Error while deleting section ", error);
+    return res.status(500).json({
+      success: true,
+      message: "Error while deleting section",
+      error,
+    });
+  }
+};

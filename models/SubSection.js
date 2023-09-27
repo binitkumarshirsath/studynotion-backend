@@ -19,9 +19,6 @@ const subSectionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  additionalUrl: {
-    type: String,
-  },
 });
 
 const SubSection = mongoose.model("SubSection", subSectionSchema);

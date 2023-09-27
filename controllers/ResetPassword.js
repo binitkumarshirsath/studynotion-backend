@@ -80,6 +80,12 @@ module.exports.resetPassword = async (req, res) => {
     }
 
     const user = await User.findOne({ token });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Token expired",
+      });
+    }
     if (user.tokenExpiresIn < Date.now()) {
       return res.status(400).json({
         success: false,
