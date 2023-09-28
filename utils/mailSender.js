@@ -20,9 +20,9 @@ const sendMail = async (to, subject, text, html) => {
       html: `${html}`,
     });
 
-    console.log(`mail sent successfully to: ${user} , info:`, info);
+    console.log(`mail sent successfully to: ${to} .`);
   } catch (error) {
-    console.error("Error while sending OTP", error);
+    console.error("Error while sending mail", error);
   }
 };
 

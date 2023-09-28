@@ -13,7 +13,7 @@ const envVars = {
   CLOUD_KEY: process.env.CLOUD_API,
   CLOUD_SECRET: process.env.CLOUD_SECRET,
   RAZORPAY_KEY: process.env.RAZORPAY_KEY_ID,
-  RAZORPAY_SECRET: RAZORPAY_KEY_SECRET,
+  RAZORPAY_SECRET: process.env.RAZORPAY_KEY_SECRET,
 };
 
 module.exports = envVars;
