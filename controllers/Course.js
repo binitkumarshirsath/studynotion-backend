@@ -142,3 +142,46 @@ module.exports.getAllcourses = async (req, res) => {
     });
   }
 };
+
+//single course details
+module.exports.getCourseDetails = async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Undefined course id",
+      });
+    }
+
+    const course = await Course.findById(courseId)
+      .populate("instructor")
+      .populate("category")
+      .populate("ratingAndReviews")
+      .populate({
+        path: "courseContent",
+        model: "Section",
+        populate: {
+          path: "subSection",
+          model: "SubSection",
+        },
+      })
+      .exec();
+    //wrote exec , dk why
+    if (!course) {
+      return res.status(400).json({
+        success: false,
+        message: "No course with the particular id",
+        courseId,
+      });
+    }
+  } catch (error) {
+    console.error("Error while getting course details", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error while getting course details",
+      courseId: req.params.courseId,
+      error,
+    });
+  }
+};

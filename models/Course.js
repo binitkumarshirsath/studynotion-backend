@@ -29,7 +29,10 @@ const courseSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
   },
-  tags: [String],
+  tags: {
+    type: [String],
+    required: true,
+  },
   thumbnail: {
     type: String,
     required: true,
@@ -52,6 +55,17 @@ const courseSchema = new mongoose.Schema({
       ref: "Section",
     },
   ],
+  instructions: {
+    type: [String],
+  },
+  status: {
+    type: String,
+    enum: ["draft", "published"],
+  },
+  sold: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const Course = mongoose.model("Course", courseSchema);
