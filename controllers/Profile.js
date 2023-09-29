@@ -1,7 +1,7 @@
 const Profile = require("../models/Profile");
 const User = require("../models/User");
 const Course = require("../models/Course");
-
+const bcrypt = require("bcrypt");
 module.exports.updateProfile = async (req, res) => {
   try {
     const { gender, dob, about, phone } = req.body;
@@ -41,7 +41,7 @@ module.exports.updateProfile = async (req, res) => {
       {
         new: true,
       }
-    );
+    ).populate("additionalDetails");
     return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
@@ -60,6 +60,7 @@ module.exports.updateProfile = async (req, res) => {
 module.exports.deleteAccount = async (req, res) => {
   try {
     const id = req.user.id;
+    // console.log(id);
     if (!id) {
       return res.status(400).json({
         success: false,
@@ -94,13 +95,17 @@ module.exports.deleteAccount = async (req, res) => {
         });
       }
     });
+    // console.log(user.additionalDetails._id.toString());
+    const profileId = user?.additionalDetails?._id;
 
-    const profileId = user.additionalDetails._id;
     if (!profileId) {
       await User.findByIdAndDelete(id);
+      return res.status(200).json({
+        success: true,
+        message: "User deleted successfully",
+      });
     }
     const deletedProfile = await Profile.findByIdAndDelete(profileId);
-
     const deletedUser = await User.findByIdAndDelete(id);
 
     return res.status(200).json({
@@ -122,7 +127,13 @@ module.exports.getUserDetails = async (req, res) => {
   try {
     const id = req.user.id;
 
-    const userDetails = await User.findById(id).populate("additionalDetails");
+    const userDetails = await User.findById(id)
+      .populate("additionalDetails")
+      .populate("courses");
+    // .populate("courseProgress");
+    if (userDetails) {
+      userDetails.password = undefined;
+    }
     return res.status(200).json({
       success: true,
       message: "User details fetched successfully",

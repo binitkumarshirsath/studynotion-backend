@@ -136,10 +136,12 @@ module.exports.deleteSubSection = async (req, res) => {
         message: "Invalid section ",
       });
     }
-    section.subSection.filter(
-      (subSectionItem) =>
-        subSectionItem.id.toString() !== subSectionId.toString()
-    );
+
+    //filter generates a new array and doesnt mutate
+    // so we need to reassign it
+    section.subSection = section.subSection.filter((subSectionItem) => {
+      return subSectionItem._id.toString() !== subSectionId;
+    });
     await section.save();
 
     const deleteSubsection = await SubSection.findByIdAndDelete(subSectionId);

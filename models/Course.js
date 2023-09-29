@@ -45,7 +45,7 @@ const courseSchema = new mongoose.Schema({
   ],
   ratingAndReviews: [
     {
-      type: mongoose.Schema.Types.mongoose,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "RatingAndReview",
     },
   ],
@@ -69,4 +69,5 @@ const courseSchema = new mongoose.Schema({
 });
 
 const Course = mongoose.model("Course", courseSchema);
+
 module.exports = Course;

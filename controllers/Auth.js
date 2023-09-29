@@ -4,6 +4,8 @@ const bcrypt = require("bcrypt");
 const otpGenerator = require("otp-generator");
 const jwt = require("jsonwebtoken");
 
+const { JWT_SECRET } = require("../config/env/env-vars");
+
 module.exports.sendOTP = async (req, res) => {
   try {
     const email = req.body.email;
@@ -14,7 +16,7 @@ module.exports.sendOTP = async (req, res) => {
       });
     }
 
-    const existingUser = await User.find({ email });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(401).json({
         success: false,
@@ -27,14 +29,14 @@ module.exports.sendOTP = async (req, res) => {
       lowerCaseAlphabets: false,
     });
 
-    let similarOtp = await OTP.find({ OTP: Otp });
+    let similarOtp = await OTP.findOne({ OTP: Otp });
     while (similarOtp) {
       Otp = otpGenerator.generate(4, {
         upperCaseAlphabets: false,
         specialChars: false,
         lowerCaseAlphabets: false,
       });
-      similarOtp = await OTP.find({ OTP: Otp });
+      similarOtp = await OTP.findOne({ OTP: Otp });
     }
 
     const otpPayload = {
@@ -104,6 +106,7 @@ module.exports.signup = async (req, res) => {
     const existingOTP = await OTP.findOne({ email })
       .sort({ createdAt: -1 })
       .limit(1);
+
     if (!existingOTP) {
       return res.status(400).json({
         success: false,
@@ -116,6 +119,7 @@ module.exports.signup = async (req, res) => {
         message: "OTP do not match . Please try again.",
       });
     }
+
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({
       email,
@@ -161,10 +165,7 @@ module.exports.login = async (req, res) => {
       });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
       return res.status(401).json({

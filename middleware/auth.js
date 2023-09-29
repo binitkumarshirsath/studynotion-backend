@@ -4,9 +4,9 @@ const jwt = require("jsonwebtoken");
 module.exports.auth = async (req, res, next) => {
   try {
     const token =
-      req.cookies.token ||
-      req.body.token ||
-      req.header("Authorisation").replace("Bearer ", "");
+      req.cookies?.token ||
+      req.body?.token ||
+      req.headers["authorization"].replace("Bearer ", "");
 
     const decode = jwt.verify(token, JWT_SECRET);
     req.user = decode;

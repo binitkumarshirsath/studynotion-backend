@@ -1,7 +1,11 @@
 const User = require("../models/User");
 const sendMail = require("../utils/mailSender");
 const bcrypt = require("bcrypt");
-
+const crypto = require("crypto");
+const {
+  passwordResetToken,
+  passwordUpdated,
+} = require("../mail-template/passwordUpdate");
 //generate token and save it in users schema
 module.exports.resetPasswordToken = async (req, res) => {
   try {
@@ -35,11 +39,8 @@ module.exports.resetPasswordToken = async (req, res) => {
     );
 
     const url = `http://localhost:3000/reset-password/${token}`;
-    await sendMail(
-      email,
-      "Password Reset",
-      `Your Link for email verification is ${url}. Please click this url to reset your password.`
-    );
+    const tokenMailTemplate = passwordResetToken(email, url);
+    await sendMail(email, "Regarding Password reset.", "", tokenMailTemplate);
 
     return res.status(200).json({
       success: true,

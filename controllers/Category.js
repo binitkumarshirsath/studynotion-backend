@@ -61,6 +61,7 @@ module.exports.getAllCategory = async (req, res) => {
 module.exports.getCategoryPageDetails = async (req, res) => {
   try {
     const categoryId = req.body.categoryId;
+    console.log(typeof categoryId);
     if (!categoryId) {
       return res.status(400).json({
         success: true,
@@ -73,15 +74,15 @@ module.exports.getCategoryPageDetails = async (req, res) => {
       .exec();
 
     if (!selectedCategoryCourses) {
-      return res.statsu(404).json({
+      return res.status(404).json({
         success: false,
         message: "Courses not found",
       });
     }
 
     const differentCategoryCourses = await Category.findById({
-      _id: {
-        $ne: categoryId,
+      $ne: {
+        _id: categoryId,
       },
     })
       .populate("course")

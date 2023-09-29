@@ -1,4 +1,5 @@
 const Category = require("../models/Category");
+const RatingAndReview = require("../models/RatingAndReview");
 const Course = require("../models/Course");
 const User = require("../models/User");
 const { uploadToCloudinary } = require("../utils/uploadFile");
@@ -13,9 +14,8 @@ module.exports.createCourse = async (req, res) => {
       price,
       category,
       tags,
-      thumbnail,
     } = req.body;
-
+    const thumbnail = req.files.thumbnail;
     if (
       !courseName ||
       !courseDescription ||
@@ -57,7 +57,7 @@ module.exports.createCourse = async (req, res) => {
     const course = new Course({
       courseName,
       courseDescription,
-      thumbnail: thumbnailUrl,
+      thumbnail: thumbnailUrl.secure_url,
       instructor,
       whatYouWillLearn,
       price,
@@ -130,7 +130,7 @@ module.exports.getAllcourses = async (req, res) => {
     ).populate("instructor");
     return res.status(200).json({
       success: true,
-      message: "All courses feteched",
+      message: "All courses fetched successfully.",
       courses,
     });
   } catch (error) {
@@ -146,7 +146,8 @@ module.exports.getAllcourses = async (req, res) => {
 //single course details
 module.exports.getCourseDetails = async (req, res) => {
   try {
-    const courseId = req.params.courseId;
+    const courseId = req.query.courseId;
+
     if (!courseId) {
       return res.status(400).json({
         success: false,
@@ -165,8 +166,8 @@ module.exports.getCourseDetails = async (req, res) => {
           path: "subSection",
           model: "SubSection",
         },
-      })
-      .exec();
+      });
+
     //wrote exec , dk why
     if (!course) {
       return res.status(400).json({
@@ -175,12 +176,17 @@ module.exports.getCourseDetails = async (req, res) => {
         courseId,
       });
     }
+    return res.status(200).json({
+      success: true,
+      message: " Course details fetched successfully",
+      course,
+    });
   } catch (error) {
     console.error("Error while getting course details", error);
     return res.status(500).json({
       success: false,
       message: "Error while getting course details",
-      courseId: req.params.courseId,
+      courseId: req.query.courseId,
       error,
     });
   }

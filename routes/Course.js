@@ -45,10 +45,10 @@ const {
 router.post("/create-course", auth, isInstructor, createCourse);
 
 //get all courses
-router.get("/course-list", auth, getAllcourses);
+router.get("/course-list", getAllcourses);
 
 // get single course details
-router.get("/course-details", auth, getCourseDetails);
+router.get("/course-details", getCourseDetails);
 
 /*###########################
 # Instructor only          #
@@ -73,7 +73,7 @@ router.delete("/delete-section", auth, isInstructor, deleteSection);
 router.post("/create-subsection", auth, isInstructor, createSubSection);
 
 //update subsection
-router.post("/update-subsection", auth, isInstructor, updateSubSection);
+router.put("/update-subsection", auth, isInstructor, updateSubSection);
 
 //delete subsection
 router.delete("/delete-subsection", auth, isInstructor, deleteSubSection);
@@ -87,7 +87,9 @@ router.delete("/delete-subsection", auth, isInstructor, deleteSubSection);
 router.post("/create-category", auth, isAdmin, createCategory);
 
 //get all category
-router.post("/all-categories", getAllCategory);
+router.get("/all-categories", getAllCategory);
 
 // category page details
-router.post("/category-page-details", getCategoryPageDetails);
+router.get("/category-page-details", getCategoryPageDetails);
+
+module.exports = router;

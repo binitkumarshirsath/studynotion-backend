@@ -131,14 +131,14 @@ module.exports.deleteSection = async (req, res) => {
     const deletedSection = await Section.findByIdAndDelete({ _id: sectionId });
 
     return res.status(200).json({
-      success: false,
+      success: true,
       message: "Section deleted successfully",
       deletedSection,
     });
   } catch (error) {
     console.error("Error while deleting section ", error);
     return res.status(500).json({
-      success: true,
+      success: false,
       message: "Error while deleting section",
       error,
     });

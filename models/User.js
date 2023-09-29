@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
       ref: "Course",
     },
   ],
-  courseProgess: [
+  courseProgress: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "CourseProgress",
