@@ -118,7 +118,7 @@ module.exports.deleteAccount = async (req, res) => {
   }
 };
 
-module.exports.getAllUserDetails = async (req, res) => {
+module.exports.getUserDetails = async (req, res) => {
   try {
     const id = req.user.id;
 
@@ -133,6 +133,61 @@ module.exports.getAllUserDetails = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error while fetching user details",
+      error,
+    });
+  }
+};
+
+module.exports.changePassword = async (req, res) => {
+  try {
+    const { password, newPassword, confirmNewPassword } = req.body;
+    if (!password || !newPassword || !confirmNewPassword) {
+      return res.status(401).json({
+        success: false,
+        message: "Empty fields found",
+      });
+    }
+    if (newPassword !== confirmNewPassword) {
+      return res.status(402).json({
+        success: false,
+        message: "Password and confirm password do not match",
+      });
+    }
+
+    const existingUser = await User.findById({ _id: req.user.id });
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
+
+    if (!isPasswordCorrect) {
+      return res.status(402).json({
+        success: false,
+        message: "Password entered is wrong",
+      });
+    }
+
+    const newHashedPasswod = await bcrypt.hash(newPassword, 12);
+    const updatedUser = await User.findByIdAndUpdate(
+      existingUser._id,
+      {
+        password: newHashedPasswod,
+      },
+      { new: true }
+    );
+
+    updatedUser.password = undefined;
+
+    return res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+      updatedUser,
+    });
+  } catch (error) {
+    console.error("Error while changing password", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error while changing password",
       error,
     });
   }

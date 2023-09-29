@@ -65,7 +65,7 @@ module.exports.createSubSection = async (req, res) => {
   }
 };
 
-const updateSubSection = async (req, res) => {
+module.exports.updateSubSection = async (req, res) => {
   try {
     const { name, description, timeDuration, subSectionId } = req.body;
     const videoFile = req?.files?.videoFile;

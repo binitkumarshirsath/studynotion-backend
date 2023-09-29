@@ -13,4 +13,4 @@ const {
 router.post("/create-order", auth, isStudent, createOrder);
 
 //verify signature
-router.post("/verify-signature", auth, isStudent, verifySignature);
+router.post("/verify-signature", verifySignature);

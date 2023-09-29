@@ -1,8 +1,8 @@
 const User = require("../models/User");
 const sendMail = require("../utils/mailSender");
 const bcrypt = require("bcrypt");
-//generate token and save it in users schema
 
+//generate token and save it in users schema
 module.exports.resetPasswordToken = async (req, res) => {
   try {
     const email = req.body.email;
@@ -55,6 +55,7 @@ module.exports.resetPasswordToken = async (req, res) => {
   }
 };
 
+//use token generated to reset password
 module.exports.resetPassword = async (req, res) => {
   try {
     const { password, confirmPassword, token } = req.body;
