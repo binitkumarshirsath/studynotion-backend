@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const fileUpload = require("express-fileupload");
+const cors = require("cors");
 const { connectDb } = require("./config/connection/dbconnect");
 const { connectToCloudinary } = require("./config/connection/cloudinary");
 const { PORT } = require("./config/env/env-vars");
@@ -15,6 +16,7 @@ connectDb();
 
 //use middlewares
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(
   fileUpload({
