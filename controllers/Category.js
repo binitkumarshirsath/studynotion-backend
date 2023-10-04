@@ -44,7 +44,7 @@ module.exports.getAllCategory = async (req, res) => {
       { name: true, description: true }
     );
     return res.status(200).json({
-      success: false,
+      success: true,
       message: "All categories fetched",
       categories,
     });
