@@ -77,7 +77,7 @@ module.exports.createRatingAndReview = async (req, res) => {
     console.error("Error while posting R&R", error);
     return res.status(500).json({
       success: false,
-      messsage: "Error while posting Rating/Review",
+      message: "Error while posting Rating/Review",
       error,
     });
   }

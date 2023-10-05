@@ -113,7 +113,7 @@ module.exports.signup = async (req, res) => {
         message: "OTP doesnt exist",
       });
     }
-    if (existingOTP.OTP !== otp) {
+    if (existingOTP.OTP !== parseInt(otp)) {
       return res.status(402).json({
         success: false,
         message: "OTP do not match . Please try again.",
@@ -153,7 +153,7 @@ module.exports.login = async (req, res) => {
     if (!email || !password) {
       return res.status(401).json({
         success: false,
-        messsage: "Empty fieds found while logging in",
+        message: "Empty fieds found while logging in",
       });
     }
 
