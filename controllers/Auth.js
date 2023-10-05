@@ -153,7 +153,7 @@ module.exports.login = async (req, res) => {
     if (!email || !password) {
       return res.status(401).json({
         success: false,
-        message: "Empty fieds found while logging in",
+        message: "Empty fields found while logging in",
       });
     }
 
@@ -193,6 +193,7 @@ module.exports.login = async (req, res) => {
         success: true,
         message: "Logged in successfully",
         token,
+        user,
       });
   } catch (err) {
     console.error("Error while login ", err);
