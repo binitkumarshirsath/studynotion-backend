@@ -10,6 +10,7 @@ const { PORT } = require("./config/env/env-vars");
 const userRoutes = require("./routes/User");
 const profileRoutes = require("./routes/Profile");
 const courseRoutes = require("./routes/Course");
+const contactUsRoute = require("./routes/ContactUs");
 //Connect to cloud and db
 connectToCloudinary();
 connectDb();
@@ -28,6 +29,7 @@ app.use(
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/course", courseRoutes);
+app.use("/api/v1", contactUsRoute);
 
 app.listen(PORT || 443, () => {
   console.log("server is up and running at:" + PORT);

@@ -5,3 +5,5 @@ const { auth } = require("../middleware/auth");
 //contact us form
 
 router.post("/contact-us", contactUs);
+
+module.exports = router;

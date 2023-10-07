@@ -12,7 +12,7 @@ module.exports.contactUs = async (req, res) => {
 
     const name = firstName + " " + lastName;
     const emailTemplate = contactUs(name, email);
-    const emailAdminTempate = contactUsAdmin(name, email, message);
+    const emailAdminTempate = contactUsAdmin(name, email, message, phone);
     const sendMailToAdmin = await sendMail(
       "princevinitkumar007@gmail.com",
       `Contact us mail from ${email}`,

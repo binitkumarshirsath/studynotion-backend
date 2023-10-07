@@ -77,14 +77,14 @@ exports.contactUs = (name, email) => {
                   </p>
               </div>
               <div class="support">If you have any questions or need assistance, please feel free to directly reach out to us at <a
-                      href="mailto:princevinitkumar007@gmail.com">vinitkumar007@gmail.com</a>. We are here to help!</div>
+                      href="mailto:princevinitkumar007@gmail.com">princevinitkumar007@gmail.com</a>. We are here to help!</div>
           </div>
       </body>
       
       </html>`;
 };
 
-exports.contactUsAdmin = (name, email, message) => {
+exports.contactUsAdmin = (name, email, message, phone) => {
   return `<!DOCTYPE html>
           <html>
           
@@ -159,6 +159,7 @@ exports.contactUsAdmin = (name, email, message) => {
                   <div class="body">
                       <p>Name : ${name},</p>
                       <p>Message : ${message}</p>
+                      <p>Phone : ${phone}</p>
                       
                   </div>
                   <div class="support">Click here to reply directly to ${email}<a
