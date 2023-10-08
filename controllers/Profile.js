@@ -2,9 +2,13 @@ const Profile = require("../models/Profile");
 const User = require("../models/User");
 const Course = require("../models/Course");
 const bcrypt = require("bcrypt");
+const { uploadToCloudinary } = require("../utils/uploadFile");
+
 module.exports.updateProfile = async (req, res) => {
   try {
     const { gender, dob, about, phone } = req.body;
+
+    let image = req.files?.image;
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(400).json({
@@ -15,6 +19,9 @@ module.exports.updateProfile = async (req, res) => {
     //check if profile already exists , if it does update it else create a new one
     let profile = await Profile.findOne({ user: user._id });
 
+    if (image) {
+      var uploadedImage = await uploadToCloudinary(image);
+    }
     if (!profile) {
       // If a profile doesn't exist, create a new one
       profile = new Profile({
@@ -37,6 +44,7 @@ module.exports.updateProfile = async (req, res) => {
       },
       {
         additionalDetails: profile._id,
+        image: uploadedImage?.secure_url || user.image,
       },
       {
         new: true,
