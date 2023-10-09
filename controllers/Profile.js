@@ -3,10 +3,11 @@ const User = require("../models/User");
 const Course = require("../models/Course");
 const bcrypt = require("bcrypt");
 const { uploadToCloudinary } = require("../utils/uploadFile");
+const { default: mongoose } = require("mongoose");
 
 module.exports.updateProfile = async (req, res) => {
   try {
-    const { gender, dob, about, phone } = req.body;
+    const { gender, dob, about, phone, firstName, lastName } = req.body;
 
     let image = req.files?.image;
     const user = await User.findById(req.user.id);
@@ -16,12 +17,17 @@ module.exports.updateProfile = async (req, res) => {
         message: "Invalid user",
       });
     }
-    //check if profile already exists , if it does update it else create a new one
-    let profile = await Profile.findOne({ user: user._id });
 
+    // if image is passed , upload and get the url
     if (image) {
       var uploadedImage = await uploadToCloudinary(image);
     }
+
+    //check if profile already exists , if it does update it else create a new one
+    let profile = await Profile.findOne({
+      user: new mongoose.Types.ObjectId(user._id),
+    });
+
     if (!profile) {
       // If a profile doesn't exist, create a new one
       profile = new Profile({
@@ -29,13 +35,14 @@ module.exports.updateProfile = async (req, res) => {
         dateOfBirth: dob,
         about,
         contactNumber: phone,
+        user: user._id,
       });
     } else {
       // If a profile exists, update it
-      profile.gender = gender;
-      profile.dateOfBirth = dob;
-      profile.about = about;
-      profile.contactNumber = phone;
+      profile.gender = gender || profile.gender;
+      profile.dateOfBirth = dob || profile.dateOfBirth;
+      profile.about = about || profile.about;
+      profile.contactNumber = phone || profile.contactNumber;
     }
     await profile.save();
     const updatedUser = await User.findByIdAndUpdate(
@@ -43,6 +50,8 @@ module.exports.updateProfile = async (req, res) => {
         _id: user._id,
       },
       {
+        firstName: firstName || user.firstName,
+        lastName: lastName || user.lastName,
         additionalDetails: profile._id,
         image: uploadedImage?.secure_url || user.image,
       },
@@ -137,7 +146,8 @@ module.exports.getUserDetails = async (req, res) => {
 
     const userDetails = await User.findById(id)
       .populate("additionalDetails")
-      .populate("courses");
+      .populate("courses")
+      .exec();
     // .populate("courseProgress");
     if (userDetails) {
       userDetails.password = undefined;

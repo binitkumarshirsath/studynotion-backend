@@ -15,6 +15,10 @@ const profileSchema = new mongoose.Schema({
   contactNumber: {
     type: Number,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 const Profile = mongoose.model("Profile", profileSchema);
