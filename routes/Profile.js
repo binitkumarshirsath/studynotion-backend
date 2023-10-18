@@ -7,6 +7,7 @@ const {
   changePassword,
   deleteAccount,
   updateProfile,
+  getUserCourses,
 } = require("../controllers/Profile");
 
 const {
@@ -28,6 +29,9 @@ router.post("/change-password", auth, changePassword);
 
 //delete account
 router.delete("/delete-account", auth, deleteAccount);
+
+// get courselist , student ->enrolled || instructor -> created
+router.get("/get-courselist", auth, getUserCourses);
 
 /*
 ####################################################################

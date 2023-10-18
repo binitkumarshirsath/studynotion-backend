@@ -9,17 +9,17 @@ module.exports.createCourse = async (req, res) => {
     const {
       courseName,
       courseDescription,
-      instructor,
       whatYouWillLearn,
       price,
       category,
       tags,
+      courseRequirement,
     } = req.body;
-    const thumbnail = req.files.thumbnail;
+    const thumbnail = req.files?.thumbnail;
     if (
       !courseName ||
       !courseDescription ||
-      !instructor ||
+      !courseRequirement ||
       !whatYouWillLearn ||
       !price ||
       !category ||
@@ -58,9 +58,10 @@ module.exports.createCourse = async (req, res) => {
       courseName,
       courseDescription,
       thumbnail: thumbnailUrl.secure_url,
-      instructor,
+      instructor: req.user.id,
       whatYouWillLearn,
       price,
+      courseRequirement,
       category,
       tags,
     });

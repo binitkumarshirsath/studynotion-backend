@@ -180,7 +180,7 @@ module.exports.login = async (req, res) => {
       role: user.accountType,
     };
 
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "5h" });
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
     user.token = token;
     user.password = undefined;
 

@@ -91,27 +91,33 @@ module.exports.deleteAccount = async (req, res) => {
         message: "Invalid user",
       });
     }
-    //deleting the users entry frome enrolled courses
-    user.courses.map(async (courseId) => {
-      try {
-        const course = await Course.findById(courseId);
-        course.studentEnrolled.filter(async (studentId) => {
-          return studentId.toString() !== id.toString();
-        });
-        await course.save();
-      } catch (error) {
-        console.error(
-          "Error while deleting the user entry from courses",
-          error
-        );
-        return res.status(500).json({
-          success: false,
-          message:
-            "Error while deleting user entry from courses. Account deleted failed",
-          error,
-        });
-      }
-    });
+
+    if (user.courses.length >= 1) {
+      //deleting the users entry from enrolled courses
+      user.courses.map(async (courseId) => {
+        // user->course array -> [course id,....]
+        try {
+          // finding the course with the course
+          const course = await Course.findById(courseId);
+          // student enrolled is an array
+          course = course.studentEnrolled.filter((studentId) => {
+            return studentId.toString() !== id.toString();
+          });
+          await course.save();
+        } catch (error) {
+          console.error(
+            "Error while deleting the user entry from courses",
+            error
+          );
+          return res.status(500).json({
+            success: false,
+            message:
+              "Error while deleting user entry from courses. Account deleted failed",
+            error,
+          });
+        }
+      });
+    }
     // console.log(user.additionalDetails._id.toString());
     const profileId = user?.additionalDetails?._id;
 
@@ -217,6 +223,42 @@ module.exports.changePassword = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error while changing password",
+      error,
+    });
+  }
+};
+
+// for students its enrolled , for instructores its created one
+module.exports.getUserCourses = async (req, res) => {
+  try {
+    const id = req?.user?.id;
+    const user = await User.findById(id).populate({
+      path: "courses",
+      populate: {
+        path: "courseContent",
+        populate: {
+          path: "subSection",
+        },
+      },
+    });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User doesnt exists",
+        id: id,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Courses fetched successfully",
+      data: user.courses,
+    });
+  } catch (error) {
+    console.error("Error while fetching enrolled courses");
+    return res.status(500).json({
+      success: false,
+      message: "Error while fetching enrolled courses",
       error,
     });
   }

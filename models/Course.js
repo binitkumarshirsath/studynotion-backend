@@ -43,6 +43,11 @@ const courseSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  courseRequirement: [
+    {
+      type: String,
+    },
+  ],
   ratingAndReviews: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -61,6 +66,7 @@ const courseSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ["draft", "published"],
+    default: "draft",
   },
   sold: {
     type: Number,
