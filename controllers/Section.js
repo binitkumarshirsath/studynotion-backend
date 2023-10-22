@@ -58,6 +58,7 @@ module.exports.createSection = async (req, res) => {
 module.exports.updateSection = async (req, res) => {
   try {
     const sectionName = req.body.sectionName;
+    const courseId = req.body.courseId;
     const sectionId = req.body.sectionId;
     if (!sectionName) {
       return res.status(400).json({
@@ -85,10 +86,17 @@ module.exports.updateSection = async (req, res) => {
       }
     );
 
+    const course = await Course.findById(courseId).populate({
+      path: "courseContent",
+      populate: {
+        path: "subSection",
+      },
+    });
     return res.status(200).json({
       success: true,
       message: "Section updated successfully",
       updatedSection,
+      course,
     });
   } catch (error) {
     console.error("Error while updating section ", error);
@@ -128,12 +136,12 @@ module.exports.deleteSection = async (req, res) => {
       }
     );
     await doesCourseExists.save();
-    const deletedSection = await Section.findByIdAndDelete({ _id: sectionId });
+    await Section.findByIdAndDelete({ _id: sectionId });
 
     return res.status(200).json({
       success: true,
       message: "Section deleted successfully",
-      deletedSection,
+      course: doesCourseExists,
     });
   } catch (error) {
     console.error("Error while deleting section ", error);
