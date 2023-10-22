@@ -13,7 +13,7 @@ module.exports.auth = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Error while authenticating", error);
-    return res.json({
+    return res.status(402).json({
       success: false,
       message: "Error while authenticating the client.",
       error,
@@ -33,7 +33,7 @@ module.exports.isAdmin = (req, res, next) => {
     next();
   } catch (error) {
     console.error("Error while authorizing admin", error);
-    return res.json({
+    return res.status(402).json({
       success: false,
       message: "Error while authorizing the admin",
       error,
@@ -53,7 +53,7 @@ module.exports.isInstructor = (req, res, next) => {
     next();
   } catch (error) {
     console.error("Error while authorizing instructor", error);
-    return res.json({
+    return res.status(402).json({
       success: false,
       message: "Error while authorizing the instructor",
       error,
@@ -73,7 +73,7 @@ module.exports.isStudent = (req, res, next) => {
     next();
   } catch (error) {
     console.error("Error while authorizing student", error);
-    return res.json({
+    return res.status(402).json({
       success: false,
       message: "Error while authorizing the student",
       error,
