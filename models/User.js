@@ -1,57 +1,61 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  firstName: {
-    required: true,
-    type: String,
-  },
-  lastName: {
-    required: true,
-    type: String,
-  },
-  email: {
-    required: true,
-    type: String,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  additionalDetails: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Profile",
-  },
-  accountType: {
-    enum: ["student", "admin", "instructor"],
-    type: String,
-    required: true,
-  },
-  courses: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
+    firstName:{
+        type:String,
+        required:true,
+        trim:true,
     },
-  ],
-  courseProgress: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "CourseProgress",
+    lastName:{
+        type:String,
+        required:true,
+        trim:true,
     },
-  ],
-  image: {
-    type: String,
-  },
+    email:{
+        type:String,
+        required:true,
+        trim:true,
+    },
+    password:{
+        type:String,
+        required:true,
+        
+    },
+    accountType:{
+        type:String,
+        enum:["Admin","Student","Instructor"],
+        required:true
 
-  //forget password fields
-  token: {
-    type: String,
-  },
+    },
+    additionalDetails:{
+        type:mongoose.Schema.Types.ObjectId,
+        required:true,
+        ref:"Profile",
+    },
+    courses:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"Course",
+        }
+    ],
+    image:{
+        type:String,
+        required:true,
+    },
+    token: {
+        type: String,
+    },
+    resetPasswordExpires: {
+        type: Date,
+    },
+    courseProgress: [
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"courseProgress",
 
-  tokenExpiresIn: {
-    type: Date,
-  },
+        }
+    ],
+
 });
 
-const User = mongoose.model("User", userSchema);
-
-module.exports = User;
+module.exports = mongoose.model("User",userSchema);

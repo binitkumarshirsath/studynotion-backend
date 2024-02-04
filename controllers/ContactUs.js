@@ -1,41 +1,53 @@
-const sendMail = require("../utils/mailSender");
-const { contactUs, contactUsAdmin } = require("../mail-template/contactUs");
-module.exports.contactUs = async (req, res) => {
+const mailSender = require("../utils/mailSender");
+const ContactFormRes = require("../mail/templates/ContactFormRes");
+
+exports.contactUs = async (req, res) => {
+  const { firstName, lastName, email, message, phoneNo } = req.body;
+  if (!firstName || !email || !message) {
+    return res.status(403).send({
+      success: false,
+      message: "All Fields are required",
+    });
+  }
   try {
-    const { firstName, lastName, email, phone, message } = req.body;
-    if (!firstName || !lastName || !email || !phone || !message) {
-      return res.status(400).json({
+    const data = {
+      firstName,
+      lastName: `${lastName ? lastName : "null"}`,
+      email,
+      message,
+      phoneNo: `${phoneNo ? phoneNo : "null"}`,
+    };
+
+    const temp = ContactFormRes.ContactFormRes(
+      email,
+      firstName,
+      lastName,
+      message,
+      phoneNo
+    );
+
+    await mailSender(email, "Copy of Response", temp);
+
+    const info = await mailSender(
+      "princevinitkumar007@gmail.com",
+      "StudyNotion",
+      temp
+    );
+    if (info) {
+      return res.status(200).send({
+        success: true,
+        message: "Your message has been sent successfully",
+      });
+    } else {
+      return res.status(403).send({
         success: false,
-        message: "Empty fields found.",
+        message: "Something went wrong",
       });
     }
-
-    const name = firstName + " " + lastName;
-    const emailTemplate = contactUs(name, email);
-    const emailAdminTempate = contactUsAdmin(name, email, message, phone);
-    const sendMailToAdmin = await sendMail(
-      "princevinitkumar007@gmail.com",
-      `Contact us mail from ${email}`,
-      `${email} sent you a mail`,
-      emailAdminTempate
-    );
-    const response = await sendMail(
-      email,
-      "Thanks for contacting us",
-      "We will get back to you as soon as possible",
-      emailTemplate
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: "Contact us mail sent to admin and user successfully.",
-    });
   } catch (error) {
-    console.error("Error occurred while contacting us", error);
-    return res.status(500).json({
+    return res.status(403).send({
       success: false,
-      message: "Error while contacting us",
-      error,
+      message: "Something went wrong",
     });
   }
 };

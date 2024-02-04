@@ -1,48 +1,27 @@
-const express = require("express");
-const router = express.Router();
-
-// import controllers
+const express = require("express")
+const router = express.Router()
+const { auth, isInstructor } = require("../middlewares/auth")
 const {
-  getUserDetails,
-  changePassword,
   deleteAccount,
   updateProfile,
-  getUserCourses,
-} = require("../controllers/Profile");
+  getAllUserDetails,
+  updateDisplayPicture,
+  getEnrolledCourses,
+  instructorDashboard,
+} = require("../controllers/Profile")
+const { isDemo } = require("../middlewares/demo");
 
-const {
-  resetPasswordToken,
-  resetPassword,
-} = require("../controllers/ResetPassword");
-
-//import middleware
-const { auth } = require("../middleware/auth");
-
-//get a single users detail
-router.get("/user-details", auth, getUserDetails);
-
-//update the user profile
-router.post("/update-user", auth, updateProfile);
-
-//change users password while logged in
-router.post("/change-password", auth, changePassword);
-
-//delete account
-router.delete("/delete-account", auth, deleteAccount);
-
-// get courselist , student ->enrolled || instructor -> created
-router.get("/get-courselist", auth, getUserCourses);
-
-/*
-####################################################################
-#                Reset password while not logged in                #
-####################################################################
-*/
-
-//generate token and send it to mail
-router.post("/password-token", resetPasswordToken);
-
-//use token to reset password
-router.post("/reset-password", resetPassword);
+// ********************************************************************************************************
+//                                      Profile routes
+// ********************************************************************************************************
+// Delet User Account
+router.delete("/deleteProfile",auth,isDemo,deleteAccount)
+router.put("/updateProfile", auth,isDemo, updateProfile)
+router.get("/getUserDetails", auth, getAllUserDetails)
+// Get Enrolled Courses
+router.get("/getEnrolledCourses", auth, getEnrolledCourses)
+router.put("/updateDisplayPicture", auth,isDemo,updateDisplayPicture)
+//get instructor dashboard details
+router.get("/instructorDashboard",auth,isInstructor, instructorDashboard)
 
 module.exports = router;

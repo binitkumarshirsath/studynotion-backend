@@ -1,9 +1,7 @@
-const router = require("express").Router();
+const express = require("express")
+const router = express.Router()
+const {contactUs}=require("../controllers/ContactUs");
 
-const { contactUs } = require("../controllers/ContactUs");
-const { auth } = require("../middleware/auth");
-//contact us form
+router.post("/contact", contactUs)
 
-router.post("/contact-us", contactUs);
-
-module.exports = router;
+module.exports = router

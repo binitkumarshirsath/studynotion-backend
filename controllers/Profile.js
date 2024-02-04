@@ -1,265 +1,263 @@
 const Profile = require("../models/Profile");
 const User = require("../models/User");
+const { uploadImageToCloudinary } = require("../utils/imageUploader");
+const CourseProgress = require("../models/CourseProgress");
+const mongoose = require("mongoose");
+const { convertSecondsToDuration } = require("../utils/secToDuration");
 const Course = require("../models/Course");
-const bcrypt = require("bcrypt");
-const { uploadToCloudinary } = require("../utils/uploadFile");
-const { default: mongoose } = require("mongoose");
 
-module.exports.updateProfile = async (req, res) => {
+exports.updateProfile = async (req, res) => {
   try {
-    const { gender, dob, about, phone, firstName, lastName } = req.body;
-
-    let image = req.files?.image;
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid user",
-      });
-    }
-
-    // if image is passed , upload and get the url
-    if (image) {
-      var uploadedImage = await uploadToCloudinary(image);
-    }
-
-    //check if profile already exists , if it does update it else create a new one
-    let profile = await Profile.findOne({
-      user: new mongoose.Types.ObjectId(user._id),
-    });
-
-    if (!profile) {
-      // If a profile doesn't exist, create a new one
-      profile = new Profile({
-        gender,
-        dateOfBirth: dob,
-        about,
-        contactNumber: phone,
-        user: user._id,
-      });
-    } else {
-      // If a profile exists, update it
-      profile.gender = gender || profile.gender;
-      profile.dateOfBirth = dob || profile.dateOfBirth;
-      profile.about = about || profile.about;
-      profile.contactNumber = phone || profile.contactNumber;
-    }
-    await profile.save();
-    const updatedUser = await User.findByIdAndUpdate(
-      {
-        _id: user._id,
-      },
-      {
-        firstName: firstName || user.firstName,
-        lastName: lastName || user.lastName,
-        additionalDetails: profile._id,
-        image: uploadedImage?.secure_url || user.image,
-      },
-      {
-        new: true,
-      }
-    ).populate("additionalDetails");
-    return res.status(200).json({
-      success: true,
-      message: "Profile updated successfully",
-      updatedUser,
-    });
-  } catch (error) {
-    console.error("Error while updating profile", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error while updating profile",
-      error,
-    });
-  }
-};
-
-module.exports.deleteAccount = async (req, res) => {
-  try {
+    // get data
+    const {
+      firstName = "",
+      lastName = "",
+      dateOfBirth = "",
+      about = "",
+      contactNumber = "",
+      gender = "",
+    } = req.body;
+    // get userId
     const id = req.user.id;
-    // console.log(id);
-    if (!id) {
+    // validation
+    if (!contactNumber || !id) {
       return res.status(400).json({
         success: false,
-        message: "Invalid id",
+        message: "All fields are required!",
       });
     }
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid user",
-      });
-    }
+    // find profile
+    const userDetails = await User.findById(id);
+    const profileId = userDetails.additionalDetails;
+    const profileDetails = await Profile.findById(profileId);
 
-    if (user.courses.length >= 1) {
-      //deleting the users entry from enrolled courses
-      user.courses.map(async (courseId) => {
-        // user->course array -> [course id,....]
-        try {
-          // finding the course with the course
-          const course = await Course.findById(courseId);
-          // student enrolled is an array
-          course = course.studentEnrolled.filter((studentId) => {
-            return studentId.toString() !== id.toString();
-          });
-          await course.save();
-        } catch (error) {
-          console.error(
-            "Error while deleting the user entry from courses",
-            error
-          );
-          return res.status(500).json({
-            success: false,
-            message:
-              "Error while deleting user entry from courses. Account deleted failed",
-            error,
-          });
-        }
-      });
-    }
-    // console.log(user.additionalDetails._id.toString());
-    const profileId = user?.additionalDetails?._id;
-
-    if (!profileId) {
-      await User.findByIdAndDelete(id);
-      return res.status(200).json({
-        success: true,
-        message: "User deleted successfully",
-      });
-    }
-    const deletedProfile = await Profile.findByIdAndDelete(profileId);
-    const deletedUser = await User.findByIdAndDelete(id);
-
-    return res.status(200).json({
-      success: true,
-      message: "User deleted successfully",
-      deletedUser,
+    const user = await User.findByIdAndUpdate(id, {
+      firstName,
+      lastName,
     });
-  } catch (error) {
-    console.error("Error while deleting account", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error while deleting account",
-      error,
-    });
-  }
-};
+    await user.save();
 
-module.exports.getUserDetails = async (req, res) => {
-  try {
-    const id = req.user.id;
+    // update profile
+    profileDetails.dateOfBirth = dateOfBirth;
+    profileDetails.about = about;
+    profileDetails.gender = gender;
+    profileDetails.contactNumber = contactNumber;
+    await profileDetails.save();
 
-    const userDetails = await User.findById(id)
+    // Find the updated user details
+    const updatedUserDetails = await User.findById(id)
       .populate("additionalDetails")
-      .populate("courses")
       .exec();
-    // .populate("courseProgress");
-    if (userDetails) {
-      userDetails.password = undefined;
-    }
+    // return response
     return res.status(200).json({
       success: true,
-      message: "User details fetched successfully",
-      userDetails,
+      message: "profile updated successfully!",
+      updatedUserDetails,
     });
   } catch (error) {
-    console.error("Error while fetching user details", error);
     return res.status(500).json({
       success: false,
-      message: "Error while fetching user details",
-      error,
+      error: error.message,
     });
   }
 };
 
-module.exports.changePassword = async (req, res) => {
+exports.deleteAccount = async (req, res) => {
   try {
-    const { password, newPassword, confirmNewPassword } = req.body;
-    if (!password || !newPassword || !confirmNewPassword) {
-      return res.status(401).json({
-        success: false,
-        message: "Empty fields found",
-      });
-    }
-    if (newPassword !== confirmNewPassword) {
-      return res.status(402).json({
-        success: false,
-        message: "Password and confirm password do not match",
-      });
-    }
-
-    const existingUser = await User.findById({ _id: req.user.id });
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
-
-    if (!isPasswordCorrect) {
-      return res.status(402).json({
-        success: false,
-        message: "Password entered is wrong",
-      });
-    }
-
-    const newHashedPasswod = await bcrypt.hash(newPassword, 12);
-    const updatedUser = await User.findByIdAndUpdate(
-      existingUser._id,
-      {
-        password: newHashedPasswod,
-      },
-      { new: true }
-    );
-
-    updatedUser.password = undefined;
-
-    return res.status(200).json({
-      success: true,
-      message: "Password changed successfully",
-      updatedUser,
-    });
-  } catch (error) {
-    console.error("Error while changing password", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error while changing password",
-      error,
-    });
-  }
-};
-
-// for students its enrolled , for instructores its created one
-module.exports.getUserCourses = async (req, res) => {
-  try {
-    const id = req?.user?.id;
-    const user = await User.findById(id).populate({
-      path: "courses",
-      populate: {
-        path: "courseContent",
-        populate: {
-          path: "subSection",
-        },
-      },
-    });
+    // TODO: Find More on Job Schedule
+    // const job = schedule.scheduleJob("10 * * * * *", function () {
+    // 	console.log("The answer to life, the universe, and everything!");
+    // });
+    // console.log(job);
+    const id = req.user.id;
+    const user = await User.findById({ _id: id });
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User doesnt exists",
-        id: id,
+        message: "User not found",
       });
     }
-
-    return res.status(200).json({
+    // Delete Assosiated Profile with the User
+    await Profile.findByIdAndDelete({ _id: user.additionalDetails });
+    // TODO: Unenroll User From All the Enrolled Courses
+    // Now Delete User
+    await User.findByIdAndDelete({ _id: id });
+    res.status(200).json({
       success: true,
-      message: "Courses fetched successfully",
-      data: user.courses,
+      message: "User deleted successfully",
     });
   } catch (error) {
-    console.error("Error while fetching enrolled courses");
+    console.log(error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "User Cannot be deleted successfully",
+        error: error.message,
+      });
+  }
+};
+
+exports.getAllUserDetails = async (req, res) => {
+  try {
+    const id = req.user.id;
+    const userDetails = await User.findById(id)
+      .populate("additionalDetails")
+      .exec();
+    console.log(userDetails);
+    res.status(200).json({
+      success: true,
+      message: "User Data fetched successfully",
+      data: userDetails,
+    });
+  } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Error while fetching enrolled courses",
-      error,
+      message: error.message,
     });
+  }
+};
+
+exports.getEnrolledCourses = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    let userDetails = await User.findOne({
+      _id: userId,
+    })
+      .populate({
+        path: "courses",
+        populate: {
+          path: "courseContent",
+          populate: {
+            path: "subSection",
+          },
+        },
+      })
+      .exec();
+    userDetails = userDetails.toObject();
+    var SubsectionLength = 0;
+    for (var i = 0; i < userDetails.courses.length; i++) {
+      let totalDurationInSeconds = 0;
+      SubsectionLength = 0;
+      for (var j = 0; j < userDetails.courses[i].courseContent.length; j++) {
+        totalDurationInSeconds += userDetails.courses[i].courseContent[
+          j
+        ].subSection.reduce(
+          (acc, curr) => acc + parseInt(curr.timeDuration),
+          0
+        );
+        userDetails.courses[i].totalDuration = convertSecondsToDuration(
+          totalDurationInSeconds
+        );
+        SubsectionLength +=
+          userDetails.courses[i].courseContent[j].subSection.length;
+      }
+      let courseProgressCount = await CourseProgress.findOne({
+        courseID: userDetails.courses[i]._id,
+        userId: userId,
+      }).sort({ createdAt: -1 });
+
+      courseProgressCount = courseProgressCount?.completedVideos.length;
+      if (SubsectionLength === 0) {
+        userDetails.courses[i].progressPercentage = 100;
+      } else {
+        // To make it up to 2 decimal point
+        const multiplier = Math.pow(10, 2);
+        userDetails.courses[i].progressPercentage =
+          Math.round(
+            (courseProgressCount / SubsectionLength) * 100 * multiplier
+          ) / multiplier;
+      }
+    }
+
+    if (!userDetails) {
+      return res.status(400).json({
+        success: false,
+        message: `Could not find user with id: ${userDetails}`,
+      });
+    }
+    let c = userDetails.courses.reverse();
+    return res.status(200).json({
+      success: true,
+      data: c,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//updateDisplayPicture
+exports.updateDisplayPicture = async (req, res) => {
+  try {
+    const id = req.user.id;
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const image = req.files.displayPicture;
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+        message: "Image not found",
+      });
+    }
+    const uploadDetails = await uploadImageToCloudinary(image, "StudyNotion");
+    console.log(uploadDetails);
+
+    const updatedImage = await User.findByIdAndUpdate(
+      { _id: id },
+      { image: uploadDetails.secure_url },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Image updated successfully",
+      data: updatedImage,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//instructor dashboard
+exports.instructorDashboard = async (req, res) => {
+  try {
+    const id = req.user.id;
+    console.log("instructo ki id ye he bhai", id);
+    const courseDetails = await Course.find({ instructor: id });
+    console.log("coursedetail instructor ka", courseDetails);
+
+    const courseData = courseDetails.map((course) => {
+      const totalStudentsEnrolled = course.studentsEnrolled.length;
+      const totalAmountGenerated = totalStudentsEnrolled * course.price;
+
+      // Create a new object with the additional fields
+      const courseDataWithStats = {
+        _id: course._id,
+        courseName: course.courseName,
+        courseDescription: course.courseDescription,
+        // Include other course properties as needed
+        totalStudentsEnrolled,
+        totalAmountGenerated,
+      };
+      console.log("Instructor pocha kya");
+
+      return courseDataWithStats;
+    });
+
+    res.status(200).json({ courses: courseData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };

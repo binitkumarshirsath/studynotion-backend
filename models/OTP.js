@@ -1,53 +1,55 @@
 const mongoose = require("mongoose");
 const mailSender = require("../utils/mailSender");
-const { otpTemplate } = require("../mail-template/emailVerification");
-
-const otpSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-  },
-  OTP: {
-    type: Number,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    index: { expireAfterSeconds: 300 },
-  },
-});
-/*
- just setting the `expires` option on the `createdAt` field schema is not enough to make the documents automatically expire after 5 minutes. 
-
-We also need to create an index on the `createdAt` field for MongoDB to actually perform the auto-expiration.
-
-The key points:
-
-- `expires` in schema just marks the field as expirable
-- We need to create an index on `createdAt` 
-- Set `expireAfterSeconds` option to define expiration time
-
-With this index, MongoDB will automatically delete documents where `createdAt` is more than 300 seconds (5 minutes) old.
-*/
-
-otpSchema.index(
-  { createdAt: 1 },
-  {
-    expireAfterSeconds: 300,
-  }
-);
-
-otpSchema.pre("save", async function (next) {
-  try {
-    const mailTemplate = otpTemplate(this.OTP);
-    await mailSender(this.email, "Email Verification", "OTP", mailTemplate);
-    console.log("Email sent successfully with otp to ", this.email);
-  } catch (error) {
-    console.error("Error while saving otp", error);
-  }
+const emailTemplate = require("../mail/templates/emailVerificationTemplate");
+const OTPSchema = new mongoose.Schema({
+	email: {
+		type: String,
+		required: true,
+	},
+	otp: {
+		type: String,
+		required: true,
+	},
+	createdAt: {
+		type: Date,
+		default: Date.now,
+		expires: 60 * 5, // The document will be automatically deleted after 5 minutes of its creation time
+	},
 });
 
-const OTP = mongoose.model("OTP", otpSchema);
+// Define a function to send emails
+async function sendVerificationEmail(email, otp) {
+	// Create a transporter to send emails
 
-module.exports = OTP;
+	// Define the email options
+
+	// Send the email
+	try {
+		const otpTemplate = emailTemplate(otp);
+		const mailResponse = await mailSender(
+			email,
+			"Verification Email",
+			otpTemplate
+            
+		);
+		console.log("Email sent successfully: ", mailResponse);
+	} catch (error) {
+		console.log("Error occurred while sending email: ", error);
+		throw error;
+	}
+}
+
+// Define a post-save hook to send email after the document has been saved
+OTPSchema.pre("save", async function (next) {
+	console.log("New document saved to database");
+
+	// Only send an email when a new document is created
+	if (this.isNew) {
+		await sendVerificationEmail(this.email, this.otp);
+	}
+	next();
+});
+
+
+
+module.exports = mongoose.model("OTP",OTPSchema);
