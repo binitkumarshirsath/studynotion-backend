@@ -105,7 +105,7 @@ exports.verifyPayment = async (req, res) => {
     return res.status(200).json({ success: true, message: "Payment Verified" });
   }
 
-  return res.status(200).json({ success: false, message: "Payment Failed" });
+  return res.status(402).json({ success: false, message: "Payment Failed" });
 };
 
 // Send Payment Success Email
